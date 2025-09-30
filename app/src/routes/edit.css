@@ -1,0 +1,53 @@
+#room-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 600px;
+}
+
+#room-form p,
+#room-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#room-form span {
+  font-weight: 500;
+  color: #fff;
+}
+
+#room-form input,
+#room-form textarea {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background-color: #1e1e1e;
+  color: #fff;
+  font-size: 1rem;
+}
+
+#room-form p:last-child {
+  flex-direction: row;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+#room-form button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid;
+}
+
+#room-form button[type="submit"] {
+  background-color: hsl(224, 98%, 58%);
+  color: white;
+  border-color: hsl(224, 98%, 58%);
+}
+
+#room-form button[type="button"] {
+  background-color: transparent;
+  color: #c5c5c5;
+  border-color: #444;
+}
