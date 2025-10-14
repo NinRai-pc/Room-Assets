@@ -102,15 +102,4 @@ body { margin: 0; background-color: var(--bg-primary); color: var(--text-primary
 .status-confirmed { background-color: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
 .status-pending { background-color: var(--status-pending-bg); color: var(--status-pending-text); }
 .status-rejected { background-color: var(--status-rejected-bg); color: var(--status-rejected-text); }
-#error-page { text-align: center; margin-top: 5rem; }```
-
-### **`app/src/routes/dashboard.css`**
-```css
-.dashboard-container { display: flex; flex-direction: column; gap: 1.5rem; }
-.dashboard-header { display: flex; justify-content: space-between; align-items: center; }
-.dashboard-header h3 { margin: 0; font-size: 1.25rem; color: var(--text-primary); }
-.bookings-list { background-color: var(--bg-secondary); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
-.bookings-table { width: 100%; border-collapse: collapse; }
-.bookings-table th, .bookings-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
-.bookings-table th { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; }
-.bookings-table tbody tr:last-child td { border-bottom: none; }
+#error-page { text-align: center; margin-top: 5rem; }
