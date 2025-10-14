@@ -17,9 +17,10 @@ export async function action({ request }: { request: Request }) {
     start: new Date(`${formData.get("startDate")}T${formData.get("startTime")}`).toISOString(),
     end: new Date(`${formData.get("endDate")}T${formData.get("endTime")}`).toISOString(),
     notes: formData.get("notes") as string,
+    status: 'pending' as const,
   };
 
-  const newBooking = await createBooking(bookingData);
+  await createBooking(bookingData);
   return redirect(`/`);
 }
 
@@ -64,22 +65,10 @@ export default function NewBooking() {
           <div className="form-section">
             <h3>Дата и время проведения</h3>
             <div className="form-row">
-              <div className="form-field">
-                <label htmlFor="startDate">Дата начала</label>
-                <input type="date" id="startDate" name="startDate" required />
-              </div>
-              <div className="form-field">
-                <label htmlFor="startTime">Время начала</label>
-                <input type="time" id="startTime" name="startTime" required />
-              </div>
-              <div className="form-field">
-                <label htmlFor="endDate">Дата окончания</label>
-                <input type="date" id="endDate" name="endDate" required />
-              </div>
-              <div className="form-field">
-                <label htmlFor="endTime">Время окончания</label>
-                <input type="time" id="endTime" name="endTime" required />
-              </div>
+              <div className="form-field"><label htmlFor="startDate">Дата начала</label><input type="date" id="startDate" name="startDate" required /></div>
+              <div className="form-field"><label htmlFor="startTime">Время начала</label><input type="time" id="startTime" name="startTime" required /></div>
+              <div className="form-field"><label htmlFor="endDate">Дата окончания</label><input type="date" id="endDate" name="endDate" required /></div>
+              <div className="form-field"><label htmlFor="endTime">Время окончания</label><input type="time" id="endTime" name="endTime" required /></div>
             </div>
           </div>
 
@@ -90,9 +79,7 @@ export default function NewBooking() {
               <select id="auditorium" name="auditorium" required>
                 <option value="">-- Выберите аудиторию --</option>
                 {rooms.map(room => (
-                  <option key={room.id} value={room.id}>
-                    {room.name} (вместимость: {room.capacity})
-                  </option>
+                  <option key={room.id} value={room.id}>{room.name} (вместимость: {room.capacity})</option>
                 ))}
               </select>
             </div>
@@ -101,14 +88,8 @@ export default function NewBooking() {
           <div className="form-section">
             <h3>Участники мероприятия</h3>
             <div className="form-row">
-                <div className="form-field">
-                    <label htmlFor="organizerName">ФИО организатора</label>
-                    <input type="text" id="organizerName" name="organizerName" placeholder="Иванов Иван Иванович" />
-                </div>
-                <div className="form-field">
-                    <label htmlFor="organizerPosition">Должность</label>
-                    <input type="text" id="organizerPosition" name="organizerPosition" placeholder="Профессор кафедры математики" />
-                </div>
+                <div className="form-field"><label htmlFor="organizerName">ФИО организатора</label><input type="text" id="organizerName" name="organizerName" placeholder="Иванов Иван Иванович" /></div>
+                <div className="form-field"><label htmlFor="organizerPosition">Должность</label><input type="text" id="organizerPosition" name="organizerPosition" placeholder="Профессор кафедры математики" /></div>
             </div>
           </div>
 

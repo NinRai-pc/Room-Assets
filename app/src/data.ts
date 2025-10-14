@@ -2,10 +2,10 @@ import localforage from "localforage";
 import { matchSorter } from "match-sorter";
 import sortBy from "sort-by";
 
-// Define types for our data structures
 export interface Room {
     id: string;
     name: string;
+    location: string;
     capacity: number;
     features: string[];
 }
@@ -22,38 +22,36 @@ export interface Booking {
     resourceType: 'room' | 'asset';
     resourceId: string;
     title: string;
-    start: string; // ISO 8601 format
-    end: string;   // ISO 8601 format
+    start: string;
+    end: string;
+    status: 'confirmed' | 'pending' | 'rejected';
     notes?: string;
 }
 
-// Generic function to get items from localforage
-async function getItems<T>(key: string): Promise<T[]> {
+export async function getItems<T>(key: string): Promise<T[]> {
     let items = await localforage.getItem<T[]>(key);
-    if (!items) {
-        items = [];
-    }
+    if (!items) items = [];
     return items;
 }
 
-// Generic function to set items in localforage
-function setItems<T>(key: string, items: T[]): Promise<T[]> {
+export function setItems<T>(key: string, items: T[]): Promise<T[]> {
     return localforage.setItem(key, items);
 }
 
-
-// --- Rooms ---
-export async function getRooms(query?: string | null): Promise<Room[]> {
+export async function getRooms(query?: string | null, features?: string[] | null): Promise<Room[]> {
     let rooms = await getItems<Room>('rooms');
     if (query) {
-        rooms = matchSorter(rooms, query, { keys: ["name"] });
+        rooms = matchSorter(rooms, query, { keys: ["name", "id", "location"] });
+    }
+    if (features && features.length > 0) {
+        rooms = rooms.filter(room => features.every(feature => room.features.includes(feature)));
     }
     return rooms.sort(sortBy("name"));
 }
 
-export async function createRoom(): Promise<Room> {
+export async function createRoom(data: Omit<Room, 'id'>): Promise<Room> {
     const id = `r-${Math.random().toString(36).substring(2, 9)}`;
-    const newRoom: Room = { id, name: "Новая аудитория", capacity: 0, features: [] };
+    const newRoom: Room = { id, ...data };
     const rooms = await getRooms();
     rooms.unshift(newRoom);
     await setItems('rooms', rooms);
@@ -85,13 +83,6 @@ export async function deleteRoom(id: string): Promise<boolean> {
     return false;
 }
 
-
-// --- Assets ---
-// Functions for assets (getAssets, createAsset, etc.) will be similar to rooms.
-// We can add them later as we build out the asset management part.
-
-
-// --- Bookings ---
 export async function getBookings(resourceId?: string | null): Promise<Booking[]> {
     let bookings = await getItems<Booking>('bookings');
     if (resourceId) {
@@ -102,35 +93,32 @@ export async function getBookings(resourceId?: string | null): Promise<Booking[]
 
 export async function createBooking(bookingData: Omit<Booking, 'id'>): Promise<Booking> {
     const id = `b-${Math.random().toString(36).substring(2, 9)}`;
-    const newBooking: Booking = { id, ...bookingData };
+    // Avoid duplicate 'status' property if bookingData already has it
+    const { status = 'pending', ...rest } = bookingData as any;
+    const newBooking: Booking = { id, status, ...rest };
     const bookings = await getBookings();
     bookings.unshift(newBooking);
     await setItems('bookings', bookings);
     return newBooking;
 }
 
-// ... other booking functions (getBooking, updateBooking, deleteBooking) will be added later.
+export async function getAllData() {
+    const rooms = await getItems<Room>('rooms');
+    const assets = await getItems<Asset>('assets');
+    const bookings = await getItems<Booking>('bookings');
+    return { rooms, assets, bookings };
+}
 
-
-// --- Seed Data ---
-// This function can be used to populate the database from the JSON file
 export async function seedData() {
     try {
         const response = await fetch('/seed/seed.example.json');
+        if (!response.ok) return;
+        
         const data = await response.json();
-        
-        // Check if data already exists to avoid overwriting
         const rooms = await getItems('rooms');
-        const assets = await getItems('assets');
-        const bookings = await getItems('bookings');
-        
         if (rooms.length === 0 && data.rooms) {
              await setItems('rooms', data.rooms);
-        }
-        if (assets.length === 0 && data.assets) {
              await setItems('assets', data.assets);
-        }
-        if (bookings.length === 0 && data.bookings) {
              await setItems('bookings', data.bookings);
         }
 

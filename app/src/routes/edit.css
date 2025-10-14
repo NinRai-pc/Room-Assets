@@ -1,53 +1,38 @@
-#room-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-width: 600px;
+.edit-page-container {
+  max-width: 800px; margin: 0 auto; background-color: var(--bg-secondary);
+  padding: 2rem; border-radius: 8px; border: 1px solid var(--border-color);
 }
-
-#room-form p,
-#room-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.edit-page-container h3 { margin-top: 0; }
+#room-form { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-field { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-field span { font-weight: 500; color: var(--text-primary); }
+#room-form input[type="text"], #room-form input[type="number"] {
+  padding: 0.6rem; border-radius: 4px; border: 1px solid var(--border-color);
+  background-color: var(--bg-primary); color: var(--text-primary); font-size: 1rem;
 }
-
-#room-form span {
-  font-weight: 500;
-  color: #fff;
+.features-checklist {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;
+  background-color: var(--bg-primary); padding: 1rem; border-radius: 4px; border: 1px solid var(--border-color);
 }
-
-#room-form input,
-#room-form textarea {
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #444;
-  background-color: #1e1e1e;
-  color: #fff;
-  font-size: 1rem;
+.features-checklist label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.custom-feature-adder { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.custom-feature-adder input { flex-grow: 1; }
+.custom-feature-adder button {
+    background-color: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);
+    padding: 0 1rem; border-radius: 4px; cursor: pointer;
 }
-
-#room-form p:last-child {
-  flex-direction: row;
-  gap: 1rem;
-  margin-top: 1rem;
+.form-actions {
+  display: flex; gap: 1rem; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;
 }
-
-#room-form button {
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid;
+.form-actions button[type="submit"] {
+  background-color: var(--accent-color); color: var(--accent-text-color); border: none;
+  padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;
 }
-
-#room-form button[type="submit"] {
-  background-color: hsl(224, 98%, 58%);
-  color: white;
-  border-color: hsl(224, 98%, 58%);
+.form-actions button[type="button"] {
+  background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;
 }
-
-#room-form button[type="button"] {
-  background-color: transparent;
-  color: #c5c5c5;
-  border-color: #444;
+.error-message {
+  color: var(--status-rejected-text); background-color: var(--status-rejected-bg);
+  padding: 0.75rem; border-radius: 4px; text-align: center;
 }

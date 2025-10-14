@@ -5,22 +5,27 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import './index.css';
-import { action as destroyAction } from "./routes/destroy.tsx";
-import Dashboard, { loader as dashboardLoader } from "./routes/dashboard.tsx";
-import Root from './root.tsx'; 
+
+import { ThemeProvider } from './theme-provider.tsx';
+
+import Root from './root.tsx';
 import ErrorPage from './error-page.tsx';
-import NewBooking, {
-  loader as newBookingLoader,
-  action as newBookingAction,
-} from "./routes/new-booking.tsx";
-import Catalog, { 
+
+import Dashboard, { loader as dashboardLoader } from "./routes/dashboard.tsx";
+import Catalog, {
   loader as catalogLoader,
-  action as catalogAction 
+  actionMassUpdate as catalogAction
 } from './routes/catalog.tsx';
 import EditRoom, {
   loader as editLoader,
   action as editAction,
+  actionCreate as createAction
 } from './routes/edit.tsx';
+import { action as destroyAction } from "./routes/destroy.tsx";
+import NewBooking, {
+  loader as newBookingLoader,
+  action as newBookingAction,
+} from "./routes/new-booking.tsx";
 
 const router = createBrowserRouter([
   {
@@ -28,12 +33,6 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
-      {
-        path: "/bookings/new",
-        element: <NewBooking />,
-        loader: newBookingLoader,
-        action: newBookingAction,
-      },
       {
         index: true,
         element: <Dashboard />,
@@ -46,24 +45,39 @@ const router = createBrowserRouter([
         action: catalogAction,
       },
       {
+        path: "catalog/new",
+        element: <EditRoom />,
+        loader: editLoader,
+        action: createAction,
+      },
+      {
         path: "catalog/:roomId/edit",
         element: <EditRoom />,
         loader: editLoader,
         action: editAction,
       },
-            {
+      {
         path: "catalog/:roomId/destroy",
         action: destroyAction,
+        errorElement: <div>Oops! There was an error deleting this room.</div>,
+      },
+      {
+        path: "/bookings/new",
+        element: <NewBooking />,
+        loader: newBookingLoader,
+        action: newBookingAction,
       },
     ],
   },
 ]);
 
-import { seedData } from './data';
+import { seedData } from './data.ts';
 seedData();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </React.StrictMode>,
 );
