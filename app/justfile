@@ -15,3 +15,15 @@ release:
     npm run build
     mkdir -p release
     cp -r dist/* release/
+
+dev-docker:
+    docker compose -f ../compose.base.yml -f ../compose.dev.yml up --build -d
+
+stop-docker:
+    docker compose -f ../compose.base.yml -f ../compose.dev.yml down
+
+prod-docker:
+    docker compose -f ../compose.base.yml -f ../compose.prod.yml up --build -d
+
+stop-prod:
+    docker compose -f ../compose.base.yml -f ../compose.prod.yml down

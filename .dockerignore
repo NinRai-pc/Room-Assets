@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.vscode
+*.log
+.env*
+release
+docs
+seed
+.DS_Store
+*.swp
+*.swo
+*~
+.idea
+.eslintcache
