@@ -93,13 +93,37 @@ export async function getBookings(resourceId?: string | null): Promise<Booking[]
 
 export async function createBooking(bookingData: Omit<Booking, 'id'>): Promise<Booking> {
     const id = `b-${Math.random().toString(36).substring(2, 9)}`;
-    // Avoid duplicate 'status' property if bookingData already has it
     const { status = 'pending', ...rest } = bookingData as any;
     const newBooking: Booking = { id, status, ...rest };
     const bookings = await getBookings();
     bookings.unshift(newBooking);
     await setItems('bookings', bookings);
     return newBooking;
+}
+
+export async function getBooking(id: string): Promise<Booking | null> {
+    const bookings = await getItems<Booking>('bookings');
+    return bookings.find(booking => booking.id === id) ?? null;
+}
+
+export async function updateBooking(id: string, updates: Partial<Booking>): Promise<Booking> {
+    let bookings = await getItems<Booking>('bookings');
+    let booking = bookings.find(booking => booking.id === id);
+    if (!booking) throw new Error(`No booking with id: ${id}`);
+    Object.assign(booking, updates);
+    await setItems('bookings', bookings);
+    return booking;
+}
+
+export async function deleteBooking(id: string): Promise<boolean> {
+    let bookings = await getItems<Booking>('bookings');
+    let index = bookings.findIndex(booking => booking.id === id);
+    if (index > -1) {
+        bookings.splice(index, 1);
+        await setItems('bookings', bookings);
+        return true;
+    }
+    return false;
 }
 
 export async function getAllData() {

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { useLoaderData, Form, Link, redirect, useSearchParams, useSubmit } from "react-router-dom";
-import { getRooms, getAllData, setItems, updateRoom } from "../data";
+import { useLoaderData, Form, Link, useSearchParams, useSubmit, useFetcher } from "react-router-dom";
+import { getRooms, getAllData, setItems } from "../data";
 import type { Room, Booking, Asset } from "../data";
 import './catalog.css';
 
@@ -44,6 +44,7 @@ export default function Catalog() {
   const { rooms, bookings, assets, q, features: activeFeatures } = useLoaderData() as { rooms: Room[], bookings: Booking[], assets: Asset[], q: string, features: string[] };
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
+  const fetcher = useFetcher();
 
   const [isMassEditing, setIsMassEditing] = useState(false);
   const [editedRooms, setEditedRooms] = useState<{ [id: string]: Partial<Room> }>({});
@@ -80,6 +81,11 @@ export default function Catalog() {
     newParams.delete('features');
     newFeatures.forEach(f => newParams.append('features', f));
     setSearchParams(newParams);
+  }
+
+  const handleDeleteRoom = (roomId: string) => {
+    if (!confirm("Подтвердите удаление")) return;
+    fetcher.submit(null, { method: 'post', action: `/catalog/${roomId}/destroy` });
   }
 
   const handleExport = async () => {
@@ -169,7 +175,7 @@ export default function Catalog() {
                       <td>
                         <div className="action-buttons">
                           <Link to={`/catalog/${room.id}/edit`} title="Редактировать">✏️</Link>
-                          <Form method="post" action={`/catalog/${room.id}/destroy`} onSubmit={(e) => !confirm("Подтвердите удаление") && e.preventDefault()}><button type="submit" title="Удалить">🗑️</button></Form>
+                          <button type="button" onClick={() => handleDeleteRoom(room.id)} title="Удалить">🗑️</button>
                         </div>
                       </td>
                     </tr>

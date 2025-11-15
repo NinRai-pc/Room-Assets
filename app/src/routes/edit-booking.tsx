@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { Form, useLoaderData, redirect, useNavigate } from "react-router-dom";
-import { getRooms, getBookings, createBooking } from "../data";
-import type { Room, Booking } from "../data";
+import { getBooking, getRooms, getBookings, updateBooking } from "../data";
+import type { Booking, Room } from "../data";
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router-dom";
 import "./new-booking.css";
 
 const ALL_FEATURES: { [key: string]: string } = {
@@ -15,13 +16,15 @@ const ALL_FEATURES: { [key: string]: string } = {
     videocall: 'Видеосвязь',
 };
 
-export async function loader() {
+export async function loader({ params }: LoaderFunctionArgs) {
+  const booking = await getBooking(params.bookingId!);
+  if (!booking) throw new Response("", { status: 404, statusText: "Not Found" });
   const rooms = await getRooms();
   const bookings = await getBookings();
-  return { rooms, bookings };
+  return { booking, rooms, bookings };
 }
 
-export async function action({ request }: { request: Request }) {
+export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
   if (!formData.get("resourceId")) {
     return { error: "Пожалуйста, выберите аудиторию." };
@@ -29,24 +32,22 @@ export async function action({ request }: { request: Request }) {
   
   const bookingData = {
     title: formData.get("eventName") as string,
-    resourceType: "room" as const,
     resourceId: formData.get("resourceId") as string,
     start: new Date(`${formData.get("startDate")}T${formData.get("startTime")}`).toISOString(),
     end: new Date(`${formData.get("endDate")}T${formData.get("endTime")}`).toISOString(),
     notes: formData.get("notes") as string,
-    status: "pending" as const,
   };
 
-  await createBooking(bookingData);
+  await updateBooking(params.bookingId!, bookingData);
   return redirect(`/`);
 }
 
-function checkAvailability(room: Room, formStart: Date, formEnd: Date, allBookings: Booking[]) {
+function checkAvailability(room: Room, formStart: Date, formEnd: Date, allBookings: Booking[], excludeBookingId?: string) {
     if (!formStart.valueOf() || !formEnd.valueOf() || formEnd <= formStart) {
         return { status: 'invalid_time', text: 'Неверное время' };
     }
     
-    const roomBookings = allBookings.filter(b => b.resourceId === room.id);
+    const roomBookings = allBookings.filter(b => b.resourceId === room.id && b.id !== excludeBookingId);
     const hasConflict = roomBookings.some(booking => {
         const bookingStart = new Date(booking.start);
         const bookingEnd = new Date(booking.end);
@@ -60,17 +61,20 @@ function checkAvailability(room: Room, formStart: Date, formEnd: Date, allBookin
     return { status: 'available', text: 'Свободна' };
 }
 
-export default function NewBooking() {
-  const { rooms, bookings } = useLoaderData() as { rooms: Room[], bookings: Booking[] };
+export default function EditBooking() {
+  const { booking, rooms, bookings } = useLoaderData() as { booking: Booking, rooms: Room[], bookings: Booking[] };
   const navigate = useNavigate();
 
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [startTime, setStartTime] = useState('09:00'); // Default 24-hour time
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endTime, setEndTime] = useState('10:00');   // Default 24-hour time
+  const startDateTime = new Date(booking.start);
+  const endDateTime = new Date(booking.end);
+
+  const [startDate, setStartDate] = useState(startDateTime.toISOString().split('T')[0]);
+  const [startTime, setStartTime] = useState(startDateTime.toTimeString().slice(0, 5));
+  const [endDate, setEndDate] = useState(endDateTime.toISOString().split('T')[0]);
+  const [endTime, setEndTime] = useState(endDateTime.toTimeString().slice(0, 5));
   const [capacityFilter, setCapacityFilter] = useState('');
   const [featuresFilter, setFeaturesFilter] = useState<string[]>([]);
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string>(booking.resourceId);
 
   const formStartTime = useMemo(() => new Date(`${startDate}T${startTime}`), [startDate, startTime]);
   const formEndTime = useMemo(() => new Date(`${endDate}T${endTime}`), [endDate, endTime]);
@@ -100,7 +104,7 @@ export default function NewBooking() {
     <div className="new-booking-container">
       <div className="new-booking-header">
           <button type="button" onClick={() => navigate(-1)} className="back-button">← Назад к списку</button>
-          <h2>Создание нового бронирования</h2>
+          <h2>Редактирование бронирования</h2>
       </div>
       
       <Form method="post" id="booking-form">
@@ -108,14 +112,14 @@ export default function NewBooking() {
           <div className="form-main-area">
             <div className="form-section">
                 <h3>Основная информация</h3>
-                <div className="form-field"><label htmlFor="eventName">Название мероприятия</label><input type="text" id="eventName" name="eventName" required /></div>
+                <div className="form-field"><label htmlFor="eventName">Название мероприятия</label><input type="text" id="eventName" name="eventName" defaultValue={booking.title} required /></div>
                 <div className="form-row">
                     <div className="form-field"><label htmlFor="startDate">Дата начала</label><input type="date" id="startDate" name="startDate" value={startDate} onChange={e => setStartDate(e.target.value)} required /></div>
                     <div className="form-field"><label htmlFor="startTime">Время начала</label><input type="time" id="startTime" name="startTime" value={startTime} onChange={e => setStartTime(e.target.value)} required /></div>
                     <div className="form-field"><label htmlFor="endDate">Дата окончания</label><input type="date" id="endDate" name="endDate" value={endDate} onChange={e => setEndDate(e.target.value)} required /></div>
                     <div className="form-field"><label htmlFor="endTime">Время окончания</label><input type="time" id="endTime" name="endTime" value={endTime} onChange={e => setEndTime(e.target.value)} required /></div>
                 </div>
-                <div className="form-field"><label htmlFor="notes">Примечания</label><textarea id="notes" name="notes" placeholder="Дополнительная информация о бронировании..." /></div>
+                <div className="form-field"><label htmlFor="notes">Примечания</label><textarea id="notes" name="notes" defaultValue={booking.notes || ''} placeholder="Дополнительная информация о бронировании..." /></div>
             </div>
 
             <div className="form-section">
@@ -139,11 +143,11 @@ export default function NewBooking() {
             <h3>Выберите аудиторию ({filteredRooms.length})</h3>
             <div className="room-list">
               {filteredRooms.length > 0 ? filteredRooms.map(room => {
-                const availability = checkAvailability(room, formStartTime, formEndTime, bookings);
+                const availability = checkAvailability(room, formStartTime, formEndTime, bookings, booking.id);
                 const isDisabled = availability.status === 'invalid_time' || availability.status === 'conflict';
                 return (
                   <label key={room.id} className={`room-card ${isDisabled ? 'disabled' : ''} status-bg-${availability.status}`}>
-                    <input type="radio" name="resourceId" value={room.id} disabled={isDisabled} onChange={() => setSelectedRoomId(room.id)} />
+                    <input type="radio" name="resourceId" value={room.id} checked={selectedRoomId === room.id} disabled={isDisabled} onChange={() => setSelectedRoomId(room.id)} />
                     <div className="room-card-info">
                       <strong>{room.name}</strong>
                       <span>Вместимость: {room.capacity}</span>
@@ -185,8 +189,8 @@ export default function NewBooking() {
               )}
               <div className="detail-row">
                 <span className="detail-label">Статус в выбранное время:</span>
-                <span className={`detail-status status-text-${checkAvailability(selectedRoom, formStartTime, formEndTime, bookings).status}`}>
-                  {checkAvailability(selectedRoom, formStartTime, formEndTime, bookings).text}
+                <span className={`detail-status status-text-${checkAvailability(selectedRoom, formStartTime, formEndTime, bookings, booking.id).status}`}>
+                  {checkAvailability(selectedRoom, formStartTime, formEndTime, bookings, booking.id).text}
                 </span>
               </div>
             </div>
@@ -194,8 +198,8 @@ export default function NewBooking() {
         )}
 
         <div className="form-actions-footer">
-          <button type="button" className="save-draft-button">Сохранить как черновик</button>
-          <button type="submit" className="button-primary">Создать бронирование</button>
+          <button type="button" className="save-draft-button" onClick={() => navigate(-1)}>Отмена</button>
+          <button type="submit" className="button-primary">Сохранить изменения</button>
         </div>
       </Form>
     </div>

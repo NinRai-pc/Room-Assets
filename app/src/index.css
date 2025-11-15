@@ -87,9 +87,18 @@ body { margin: 0; background-color: var(--bg-primary); color: var(--text-primary
 }
 .button-primary:hover { opacity: 0.9; }
 .action-buttons { display: flex; gap: 0.5rem; }
-.action-buttons button, .action-buttons a {
+.action-buttons button, .action-buttons a, .action-buttons form {
   background: none; border: none; cursor: pointer; font-size: 1.2rem;
   padding: 0.25rem; color: var(--text-secondary); text-decoration: none;
+  transition: color 0.2s;
+}
+.action-buttons form { display: flex; margin: 0; }
+.action-buttons form button {
+  background: none; border: none; cursor: pointer; font-size: 1.2rem;
+  padding: 0.25rem; color: var(--text-secondary); transition: color 0.2s;
+}
+.action-buttons button:hover, .action-buttons a:hover, .action-buttons form button:hover {
+  color: var(--text-primary);
 }
 .stats-cards {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

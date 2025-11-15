@@ -1,5 +1,5 @@
 import React from "react";
-import { useLoaderData, Link } from "react-router-dom";
+import { useLoaderData, Link, useFetcher } from "react-router-dom";
 import { getBookings, getRooms } from "../data";
 import type { Booking, Room } from "../data";
 import "./dashboard.css";
@@ -26,6 +26,12 @@ function formatDateTime(isoString: string) {
 
 export default function Dashboard() {
   const { bookings, rooms } = useLoaderData() as { bookings: Booking[], rooms: Room[] };
+  const fetcher = useFetcher();
+
+  const handleDeleteBooking = (bookingId: string) => {
+    if (!confirm("Подтвердите удаление")) return;
+    fetcher.submit(null, { method: 'post', action: `/bookings/${bookingId}/destroy` });
+  };
 
   const dashboardStats = React.useMemo(() => {
     const now = new Date();
@@ -101,8 +107,8 @@ export default function Dashboard() {
                             <td><span className={`status ${statusInfo.className}`}>{statusInfo.text}</span></td>
                             <td>
                                 <div className="action-buttons">
-                                    <button title="Редактировать">✏️</button>
-                                    <button title="Удалить">🗑️</button>
+                                    <Link to={`/bookings/${booking.id}/edit`} title="Редактировать">✏️</Link>
+                                    <button type="button" onClick={() => handleDeleteBooking(booking.id)} title="Удалить">🗑️</button>
                                 </div>
                             </td>
                         </tr>

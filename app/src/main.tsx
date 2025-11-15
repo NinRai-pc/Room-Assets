@@ -26,6 +26,11 @@ import NewBooking, {
   loader as newBookingLoader,
   action as newBookingAction,
 } from "./routes/new-booking.tsx";
+import EditBooking, {
+  loader as editBookingLoader,
+  action as editBookingAction,
+} from "./routes/edit-booking.tsx";
+import { action as destroyBookingAction } from "./routes/booking-destroy.tsx";
 
 const router = createBrowserRouter([
   {
@@ -66,6 +71,17 @@ const router = createBrowserRouter([
         element: <NewBooking />,
         loader: newBookingLoader,
         action: newBookingAction,
+      },
+      {
+        path: "/bookings/:bookingId/edit",
+        element: <EditBooking />,
+        loader: editBookingLoader,
+        action: editBookingAction,
+      },
+      {
+        path: "/bookings/:bookingId/destroy",
+        action: destroyBookingAction,
+        errorElement: <div>Oops! There was an error deleting this booking.</div>,
       },
     ],
   },
