@@ -1,6 +1,16 @@
 services:
-  web:
+  frontend:
     build:
+      context: ./app
+      dockerfile: Dockerfile
       target: prod
-    ports:
-      - "80:80"
+    depends_on:
+      - backend
+      - scalar
+    ports: ["80:80"]
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: prod

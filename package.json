@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "start:server": "node server/index.js",
+    "dev:server": "nodemon --watch server server/index.js"
+  },
   "dependencies": {
     "react-router-dom": "^7.9.3"
+  },
+  "devDependencies": {
+    "baseline-browser-mapping": "^2.9.11"
   }
 }
