@@ -1,4 +1,8 @@
 module.exports = async function (fastify, opts) {
+  fastify.get('/', async (request, reply) => {
+    return { message: 'Room Assets API', version: '0.1.0', docs: '/documentation' };
+  });
+
   fastify.get('/api/health', async (request, reply) => {
     return { status: 'ok', timestamp: Date.now() };
   });
