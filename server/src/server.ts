@@ -36,6 +36,11 @@ async function start() {
   // Register prisma plugin
   await fastify.register(prismaPlugin)
 
+  // Root endpoint
+  fastify.get('/', async (request, reply) => {
+    return { message: 'Room Assets API', version: '0.1.0', docs: '/documentation' }
+  })
+
   // Health check endpoint
   fastify.get('/api/health', async (request, reply) => {
     return { status: 'ok', timestamp: Date.now() }
