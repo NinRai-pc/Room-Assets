@@ -1,10 +1,6 @@
-module.exports = async function (fastify, opts) {
+export async function roomRoutes(fastify, opts) {
   fastify.get('/', async (request, reply) => {
     return { message: 'Room Assets API', version: '0.1.0', docs: '/documentation' };
-  });
-
-  fastify.get('/api/health', async (request, reply) => {
-    return { status: 'ok', timestamp: Date.now() };
   });
 
   fastify.get('/api/rooms', async (request, reply) => {
@@ -13,8 +9,10 @@ module.exports = async function (fastify, opts) {
       { id: 2, name: 'Huddle B', capacity: 4 }
     ];
   });
+}
 
+export async function bookingRoutes(fastify, opts) {
   fastify.post('/api/echo', async (request, reply) => {
     return { body: request.body };
   });
-};
+}
