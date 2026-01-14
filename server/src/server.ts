@@ -43,7 +43,14 @@ async function start() {
 
   // Health check endpoint
   fastify.get('/api/health', async (request, reply) => {
-    return { status: 'ok', timestamp: Date.now() }
+    try {
+      // Verify database is connected
+      await fastify.prisma.$queryRaw`SELECT 1`
+      return { status: 'ok', timestamp: new Date().toISOString() }
+    } catch (error) {
+      reply.status(503)
+      return { status: 'error', message: error instanceof Error ? error.message : 'Unknown error' }
+    }
   })
 
   // Register routes
