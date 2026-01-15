@@ -32,6 +32,9 @@ import EditBooking, {
 } from "./routes/edit-booking.tsx";
 import { action as destroyBookingAction } from "./routes/booking-destroy.tsx";
 
+import { seedData } from './data.ts';
+seedData();
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -85,10 +88,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
-
-import { seedData } from './data.ts';
-seedData();
+], { basename: '/Room-Assets' });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
